@@ -1,10 +1,11 @@
 import logging
 import shutil
 import threading
+import uuid
 from datetime import datetime, timezone
 from pathlib import Path
 
-from fastapi import APIRouter, HTTPException
+from fastapi import APIRouter, HTTPException, UploadFile, File
 from fastapi.responses import FileResponse
 from pydantic import BaseModel
 
@@ -13,6 +14,7 @@ from db.database import Database
 from processing.summarizer import Summarizer
 from processing.transcriber import Transcriber
 from recorder.audio_capture import AudioRecorder
+from recorder.mixer import convert_to_mp3
 
 logger = logging.getLogger(__name__)
 
@@ -91,6 +93,70 @@ def create_router(db: Database, recorder: AudioRecorder,
             audio_path=result["path"],
         )
         return {"id": rec["id"], "status": rec["status"], "duration_secs": rec["duration_secs"]}
+
+    # -- Import file --
+
+    ALLOWED_EXTENSIONS = {
+        ".mp4", ".mp3", ".wav", ".webm", ".ogg", ".flac",
+        ".m4a", ".mkv", ".avi", ".mov", ".wma", ".aac",
+    }
+
+    @router.post("/recordings/import")
+    async def import_file(file: UploadFile = File(...)):
+        if not file.filename:
+            raise HTTPException(400, "No se recibio archivo")
+
+        ext = Path(file.filename).suffix.lower()
+        if ext not in ALLOWED_EXTENSIONS:
+            raise HTTPException(
+                400,
+                f"Formato '{ext}' no soportado. "
+                f"Formatos aceptados: {', '.join(sorted(ALLOWED_EXTENSIONS))}",
+            )
+
+        recording_id = str(uuid.uuid4())
+        temp_path = config.RECORDINGS_DIR / f"{recording_id}{ext}"
+        mp3_path = config.RECORDINGS_DIR / f"{recording_id}.mp3"
+
+        try:
+            # Save uploaded file to disk
+            content = await file.read()
+            temp_path.write_bytes(content)
+
+            # Convert to MP3 and get duration
+            duration_secs = convert_to_mp3(temp_path, mp3_path)
+        except Exception as e:
+            # Clean up on failure
+            temp_path.unlink(missing_ok=True)
+            mp3_path.unlink(missing_ok=True)
+            logger.error("Error importando archivo: %s", e)
+            raise HTTPException(500, f"Error al convertir archivo: {e}")
+        finally:
+            # Remove temp file if it differs from final mp3
+            if temp_path.suffix != ".mp3" and temp_path.exists():
+                temp_path.unlink()
+
+        now = datetime.now(timezone.utc).isoformat()
+        original_name = Path(file.filename).stem
+        title = f"Importado - {original_name}"
+        rel_path = str(mp3_path.relative_to(config.BASE_DIR))
+
+        rec = db.insert_recording(recording_id, title, now)
+        db.update_recording(
+            recording_id,
+            status="stopped",
+            ended_at=now,
+            duration_secs=int(duration_secs),
+            audio_path=rel_path,
+        )
+        rec = db.get_recording(recording_id)
+
+        return {
+            "id": rec["id"],
+            "title": rec["title"],
+            "status": rec["status"],
+            "duration_secs": rec["duration_secs"],
+        }
 
     # -- Recordings CRUD --
 

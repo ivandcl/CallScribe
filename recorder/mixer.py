@@ -64,3 +64,12 @@ def wav_to_mp3(wav_path: Path, mp3_path: Path):
     """Convierte un archivo WAV a MP3 usando pydub/ffmpeg."""
     audio = AudioSegment.from_wav(str(wav_path))
     audio.export(str(mp3_path), format="mp3", bitrate="128k")
+
+
+def convert_to_mp3(input_path: Path, output_path: Path) -> float:
+    """Convierte cualquier formato de audio/video soportado por ffmpeg a MP3.
+    Retorna la duracion en segundos.
+    """
+    audio = AudioSegment.from_file(str(input_path))
+    audio.export(str(output_path), format="mp3", bitrate="128k")
+    return len(audio) / 1000.0

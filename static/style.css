@@ -26,6 +26,12 @@ header {
     gap: 1rem;
 }
 
+.header-right {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
 h1 {
     font-size: 1.4rem;
     color: #e94560;

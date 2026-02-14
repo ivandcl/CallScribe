@@ -13,6 +13,12 @@
             <span id="status-badge" class="badge badge-inactive">Inactivo</span>
         </div>
         <div class="header-right">
+            <button id="btn-import" class="btn btn-secondary" onclick="importFile()">
+                Importar archivo
+            </button>
+            <input type="file" id="file-input" style="display:none;"
+                accept=".mp4,.mp3,.wav,.webm,.ogg,.flac,.m4a,.mkv,.avi,.mov,.wma,.aac"
+                onchange="handleFileSelected(event)">
             <button id="btn-record" class="btn btn-primary" onclick="toggleRecording()">
                 Iniciar grabacion
             </button>

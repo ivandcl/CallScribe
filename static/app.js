@@ -80,6 +80,45 @@ async function toggleRecording() {
     }
 }
 
+// -- Import file --
+
+function importFile() {
+    document.getElementById("file-input").click();
+}
+
+async function handleFileSelected(event) {
+    const file = event.target.files[0];
+    if (!file) return;
+
+    const btn = document.getElementById("btn-import");
+    btn.disabled = true;
+    btn.textContent = "Importando...";
+
+    try {
+        const formData = new FormData();
+        formData.append("file", file);
+
+        const res = await fetch(`${API}/recordings/import`, {
+            method: "POST",
+            body: formData,
+        });
+
+        if (!res.ok) {
+            const err = await res.json();
+            alert("Error al importar: " + (err.detail || "Error desconocido"));
+            return;
+        }
+
+        await loadRecordings();
+    } catch (e) {
+        alert("Error al importar archivo: " + e.message);
+    } finally {
+        btn.disabled = false;
+        btn.textContent = "Importar archivo";
+        event.target.value = "";
+    }
+}
+
 // -- Recordings list --
 
 async function loadRecordings() {
