@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CallScribe</title>
+    <link rel="stylesheet" href="/style.css">
+</head>
+<body>
+    <header>
+        <div class="header-left">
+            <h1>CallScribe</h1>
+            <span id="status-badge" class="badge badge-inactive">Inactivo</span>
+        </div>
+        <div class="header-right">
+            <button id="btn-record" class="btn btn-primary" onclick="toggleRecording()">
+                Iniciar grabacion
+            </button>
+        </div>
+    </header>
+
+    <main>
+        <section id="recordings-list">
+            <h2>Grabaciones</h2>
+            <div id="recordings-container"></div>
+            <p id="no-recordings" class="muted" style="display:none;">No hay grabaciones aun.</p>
+        </section>
+
+        <section id="recording-detail" style="display:none;">
+            <button class="btn btn-secondary" onclick="showList()">&larr; Volver</button>
+
+            <div class="detail-header">
+                <input type="text" id="detail-title" class="title-input" onchange="updateTitle()">
+                <span id="detail-status" class="badge"></span>
+            </div>
+
+            <div class="detail-meta">
+                <span id="detail-date"></span>
+                <span id="detail-duration"></span>
+            </div>
+
+            <div id="detail-error" class="error-box" style="display:none;"></div>
+
+            <div class="detail-actions">
+                <button id="btn-transcribe" class="btn btn-secondary" onclick="transcribeRecording()">
+                    Transcribir
+                </button>
+                <button id="btn-summarize" class="btn btn-secondary" onclick="summarizeRecording()">
+                    Generar acta
+                </button>
+                <button id="btn-process" class="btn btn-primary" onclick="processRecording()">
+                    Procesar todo
+                </button>
+                <button id="btn-delete" class="btn btn-danger" onclick="deleteRecording()">
+                    Eliminar
+                </button>
+            </div>
+
+            <div id="audio-section" style="display:none;">
+                <h3>Audio</h3>
+                <audio id="audio-player" controls></audio>
+            </div>
+
+            <div id="transcript-section" style="display:none;">
+                <h3>Transcripcion</h3>
+                <pre id="transcript-text"></pre>
+            </div>
+
+            <div id="summary-section" style="display:none;">
+                <h3>Acta de Resumen</h3>
+                <div id="summary-content"></div>
+            </div>
+        </section>
+    </main>
+
+    <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+    <script src="/app.js"></script>
+</body>
+</html>

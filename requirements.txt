@@ -1,0 +1,22 @@
+# Audio
+pyaudiowpatch>=0.2.12
+pydub>=0.25.1
+audioop-lts>=0.2.2
+
+# Transcripcion
+faster-whisper>=1.0.0
+
+# LLM
+anthropic>=0.40.0
+requests>=2.31.0
+
+# Servidor web
+fastapi>=0.110.0
+uvicorn[standard]>=0.27.0
+
+# System tray
+pystray>=0.19.5
+Pillow>=10.0.0
+
+# Utilidades
+python-dotenv>=1.0.0
